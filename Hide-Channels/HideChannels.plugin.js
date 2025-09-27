@@ -44,7 +44,7 @@ module.exports = class HideChannels {
 			this.FormItem = Webpack.getModule(m => Filters.byStrings('titleId', 'errorId', 'setIsFocused')(m?.render), { searchExports: true });
 
 			//The sidebar to "minimize"/hide
-			this.sidebarClass = Webpack.getModule(Filters.byKeys("container", "base")).sidebarList;
+			this.sidebarClass = Webpack.getModule(Filters.byKeys("sidebarList", "sidebarListRounded")).sidebarList;
 			this.headerBarClass = Webpack.getModule(Filters.byKeys("chat", "title")).title;
 			this.baseClass = Webpack.getModule(Filters.byKeys("container", "base")).base;
 			this.avatarWrapper = Webpack.getModule(Filters.byKeys("avatarWrapper")).avatarWrapper;
