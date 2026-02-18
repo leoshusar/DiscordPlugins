@@ -44,7 +44,9 @@ module.exports = class HideChannels {
 			this.FormItem = Webpack.getModule(m => Filters.byStrings('titleId', 'errorId', 'setIsFocused')(m?.render), { searchExports: true });
 
 			//The sidebar to "minimize"/hide
-			this.sidebarClass = Webpack.getModule(Filters.byKeys("sidebarList", "sidebarListRounded")).sidebarList;
+			const sidebarModule = Webpack.getModule(Filters.byKeys("sidebarList", "sidebarListRounded"));
+			this.sidebarClass = sidebarModule.sidebarList;
+			this.serverbarClass = sidebarModule.guilds;
 			this.headerBarClass = Webpack.getModule(Filters.byKeys("chat", "title")).title;
 			this.baseClass = Webpack.getModule(Filters.byKeys("container", "base")).base;
 			this.avatarWrapper = Webpack.getModule(Filters.byKeys("avatarWrapper")).avatarWrapper;
@@ -138,6 +140,10 @@ module.exports = class HideChannels {
 		let sidebar = document.querySelector(`.${this.sidebarClass}`);
 		if (sidebar?.classList.contains(config.constants.hideElementsName))
 			sidebar.classList.remove(config.constants.hideElementsName);
+
+		let serverbar = document.querySelector(`.${this.serverbarClass}`);
+		if (serverbar?.classList.contains(config.constants.hideElementsName))
+			serverbar.classList.remove(config.constants.hideElementsName);
 	}
 
 	/**
@@ -177,11 +183,14 @@ module.exports = class HideChannels {
 	 */
 	hideChannelComponent = () => {
 		//Only fetch the sidebar on a rerender.
-		const sidebarNode = document.querySelector(`.${this.sidebarClass}`),
+		const sidebarNode = document.querySelector(`.${this.sidebarClass}`);
+		const serverbarNode = document.querySelector(`.${this.serverbarClass}`);
 			//When a state updates, it rerenders.
-			[hidden, setHidden] = React.useState(
+		const [hidden, setHidden] = React.useState(
 				//Check on a rerender where our side bar is so we can correctly reflect this.
-				sidebarNode?.classList.contains(config.constants.hideElementsName));
+				sidebarNode?.classList.contains(config.constants.hideElementsName) ||
+				serverbarNode?.classList.contains(config.constants.hideElementsName)
+		);
 		//Avatar wrapper element
 		const sidebarAvatar = document.querySelector(`.${this.avatarWrapper}`);
 		const panelsButton = document.querySelector(`.${this.panelsButton}`);
@@ -213,7 +222,7 @@ module.exports = class HideChannels {
 		 * @param {Node} sidebar Sidebar node we want to toggle.
 		 * @returns The passed state in reverse.
 		 */
-		function toggleSidebar(sidebar) {
+		function toggleSidebar(sidebar, serverbar) {
 			/**
 			 * Adds and removes our CSS to make our sidebar appear and disappear.
 			 * @param {boolean} state State that determines the toggle.
@@ -224,11 +233,13 @@ module.exports = class HideChannels {
 				if (!state) {
 					//We hide it through CSS by adding a class.
 					sidebar?.classList.add(config.constants.hideElementsName);
+					serverbar?.classList.add(config.constants.hideElementsName);
 					sidebarAvatar?.classList.add(config.constants.avatarOverlap);
 					panelsButton?.classList.add(config.constants.panelsButtonHidden);
 				} else {
 					//If it is hidden, we need to show it.
 					sidebar?.classList.remove(config.constants.hideElementsName);
+					serverbar?.classList.remove(config.constants.hideElementsName);
 					sidebarAvatar?.classList.remove(config.constants.avatarOverlap);
 					panelsButton?.classList.remove(config.constants.panelsButtonHidden);
 				}
@@ -251,7 +262,7 @@ module.exports = class HideChannels {
 			//Check if every currentlyPessed is in our saved keybind.
 			if (this.keybind.every(key => this.currentlyPressed[key.toLowerCase()] === true))
 				//Toggle the sidebar and rerender on toggle; change the state
-				setHidden(toggleSidebar(sidebarNode));
+				setHidden(toggleSidebar(sidebarNode, serverbarNode));
 
 			//Current key goes up, so...
 			this.currentlyPressed[e.key.toLowerCase()] = false;
@@ -273,7 +284,7 @@ module.exports = class HideChannels {
 			//The icon
 			className: hidden ? config.constants.buttonHidden : config.constants.buttonVisible,
 			//Toggle the sidebar and rerender on toggle; change the state.
-			onClick: () => setHidden(toggleSidebar(sidebarNode))
+			onClick: () => setHidden(toggleSidebar(sidebarNode, serverbarNode))
 		});
 	}
 
